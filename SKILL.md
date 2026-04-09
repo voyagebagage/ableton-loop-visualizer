@@ -1,6 +1,6 @@
 ---
 name: loop-visualizer
-description: Build the Ableton Loop Visualizer — a standalone SolidJS + Canvas companion app that connects to Ableton Live via AbletonOSC and displays Loopy Pro-style circular loop ring visualizations for all session clips. Use this skill whenever working on: the loop visualizer app, AbletonOSC WebSocket bridge, SolidJS canvas rendering, circular waveform ring components, Electrobun desktop packaging, or license key integration. Also trigger for any Ableton companion app development, OSC protocol integration, real-time music visualization, or 60fps canvas render loop architecture.
+description: "Build the Ableton Loop Visualizer, a standalone SolidJS + Canvas companion app that connects to Ableton Live via AbletonOSC and displays Loopy Pro-style circular loop ring visualizations for all session clips. Use this skill whenever working on the loop visualizer app, AbletonOSC WebSocket bridge, SolidJS canvas rendering, circular waveform ring components, Electrobun desktop packaging, or license key integration. Also trigger for any Ableton companion app development, OSC protocol integration, real-time music visualization, or 60fps canvas render loop architecture."
 ---
 
 # Ableton Loop Visualizer — Project Skill
