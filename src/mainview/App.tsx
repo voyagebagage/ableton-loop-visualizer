@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import SessionGrid from "./components/SessionGrid";
 
 export default function App() {
 	const [connected, setConnected] = createSignal(false);
@@ -14,9 +15,7 @@ export default function App() {
 					</span>
 				</div>
 			</header>
-			<div class="session-grid">
-				<p class="placeholder">Waiting for Ableton connection...</p>
-			</div>
+			<SessionGrid />
 		</main>
 	);
 }
