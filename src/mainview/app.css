@@ -68,19 +68,8 @@ main {
 	color: #6bff6b;
 }
 
-.session-grid {
+.session-canvas {
 	flex: 1;
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 12px;
-	padding: 16px;
-	align-content: start;
-}
-
-.placeholder {
-	grid-column: 1 / -1;
-	text-align: center;
-	color: #666;
-	padding: 80px 0;
-	font-size: 0.875rem;
+	width: 100%;
+	display: block;
 }
