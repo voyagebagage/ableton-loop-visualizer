@@ -27,7 +27,7 @@ export function createOSCClient(config: OSCClientConfig): OSCClient {
 		if (!started) return;
 		const msg: OSCMessage = { address, args };
 		const data = encodeOSC(msg);
-		socket.send(data, abletonHost, sendPort);
+		socket.send(data, sendPort, abletonHost);
 	}
 
 	function onMessage(handler: OSCMessageHandler) {
