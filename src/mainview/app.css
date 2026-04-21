@@ -55,6 +55,15 @@ main {
 	font-variant-numeric: tabular-nums;
 }
 
+.play-state {
+	font-size: 0.875rem;
+	color: #666;
+}
+
+.play-state.playing {
+	color: #6bff6b;
+}
+
 .connection-status {
 	font-size: 0.75rem;
 	padding: 2px 8px;
