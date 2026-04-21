@@ -1,3 +1,8 @@
-# loop-view / ableton-loop-vizualizer
+# Ableton Loop Visualizer
 
-<img width="1496" height="1128" alt="image" src="https://github.com/user-attachments/assets/bb31992e-ca1f-4590-83aa-addfcb75227e" />
+A Loopy-Pro-style circular loop view for Ableton Live.
+
+<img width="892" height="643" alt="output" src="https://github.com/user-attachments/assets/97a5cb62-122a-4488-8241-d653ade9ebb8" />
+
+## Why
+Ableton's native loop UX is painful to live with...
