@@ -15,19 +15,18 @@ export interface OSCClient {
 	stop: () => void;
 }
 
+type BunUDPSocket = Awaited<ReturnType<typeof Bun.udpSocket>>;
+
 export function createOSCClient(config: OSCClientConfig): OSCClient {
 	const { abletonHost, sendPort, receivePort } = config;
 	const handlers: OSCMessageHandler[] = [];
-	let socket: ReturnType<typeof Bun.udpSocket> extends Promise<infer T>
-		? T
-		: never;
-	let started = false;
+	let socket: BunUDPSocket | null = null;
 
 	function send(address: string, ...args: (number | string)[]) {
-		if (!started) return;
-		const msg: OSCMessage = { address, args };
-		const data = encodeOSC(msg);
-		socket.send(data, abletonHost, sendPort);
+		if (!socket) return;
+		const outgoingMessage: OSCMessage = { address, args };
+		const encodedPacket = encodeOSC(outgoingMessage);
+		socket.send(encodedPacket, sendPort, abletonHost);
 	}
 
 	function onMessage(handler: OSCMessageHandler) {
@@ -38,15 +37,15 @@ export function createOSCClient(config: OSCClientConfig): OSCClient {
 		socket = await Bun.udpSocket({
 			port: receivePort,
 			socket: {
-				data(_socket, data, _port, _address) {
+				data(_socket, incomingBytes, _port, _address) {
 					try {
-						const msg = decodeOSC(
-							data instanceof Uint8Array
-								? data
-								: new Uint8Array(data),
-						);
+						const bytes =
+							incomingBytes instanceof Uint8Array
+								? incomingBytes
+								: new Uint8Array(incomingBytes);
+						const decodedMessage = decodeOSC(bytes);
 						for (const handler of handlers) {
-							handler(msg);
+							handler(decodedMessage);
 						}
 					} catch (err) {
 						console.error("[OSC] Failed to decode message:", err);
@@ -54,16 +53,15 @@ export function createOSCClient(config: OSCClientConfig): OSCClient {
 				},
 			},
 		});
-		started = true;
 		console.log(
 			`[OSC] Listening on UDP port ${receivePort}, sending to ${abletonHost}:${sendPort}`,
 		);
 	}
 
 	function stop() {
-		if (started) {
+		if (socket) {
 			socket.close();
-			started = false;
+			socket = null;
 			console.log("[OSC] Client stopped");
 		}
 	}
