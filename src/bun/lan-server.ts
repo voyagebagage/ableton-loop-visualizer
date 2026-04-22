@@ -1,5 +1,6 @@
 import { networkInterfaces } from "node:os";
 import { resolve } from "node:path";
+import { existsSync } from "node:fs";
 
 export interface LANServerConfig {
 	port: number;
@@ -28,18 +29,27 @@ export function createLANServer(config: LANServerConfig): LANServer {
 
 		const file = Bun.file(resolved);
 		if (!(await file.exists())) {
+			console.log(`[LAN Server] 404: ${pathname}`);
 			return new Response("Not Found", { status: 404 });
 		}
 		return new Response(file);
 	}
 
 	function start() {
+		if (server) return;
+
+		if (!existsSync(resolve(distRoot, "index.html"))) {
+			console.error(`[LAN Server] WARNING: ${distRoot}/index.html not found`);
+			console.error(`[LAN Server] Resolved distPath: ${distRoot}`);
+			console.error(`[LAN Server] CWD: ${process.cwd()}`);
+		}
+
 		server = Bun.serve({
 			port,
 			hostname: "0.0.0.0",
 			fetch: handleRequest,
 		});
-		console.log(`[LAN Server] http://localhost:${port}`);
+		console.log(`[LAN Server] Serving ${distRoot} on port ${port}`);
 		for (const addr of getLANAddresses()) {
 			console.log(`[LAN Server] http://${addr}:${port}`);
 		}

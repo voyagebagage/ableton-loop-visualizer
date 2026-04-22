@@ -48,8 +48,9 @@ const bridge = createOSCBridge({
 });
 bridge.start();
 
-// Electrobun runs from .app/Contents/MacOS/; built views are in ../Resources/views/mainview/
-const bundledViews = resolve("../Resources/views/mainview");
+// In the Electrobun bundle the bun script lives at Contents/Resources/app/bun/,
+// with views as its sibling at Contents/Resources/app/views/mainview/.
+const bundledViews = resolve(import.meta.dir, "../views/mainview");
 const distPath = existsSync(bundledViews) ? bundledViews : resolve("dist");
 
 const lan = createLANServer({
