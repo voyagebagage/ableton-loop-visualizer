@@ -1,5 +1,6 @@
 import { BrowserWindow, Updater } from "electrobun/bun";
 import { createOSCBridge } from "./osc-bridge";
+import { createLANServer } from "./lan-server";
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
@@ -43,5 +44,11 @@ const bridge = createOSCBridge({
 });
 
 bridge.start();
+// Start the LAN HTTP server so iPads/phones on the same WiFi can open the app
+const lan = createLANServer({
+	port: 3000,
+	distPath: "dist",
+});
 
+lan.start();
 console.log("Loop View started!");
