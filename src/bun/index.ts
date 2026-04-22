@@ -5,6 +5,7 @@ import { createOSCBridge } from "./osc-bridge";
 import { createLANServer } from "./lan-server";
 
 
+
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
 
@@ -55,9 +56,6 @@ const lan = createLANServer({
 	port: 3000,
 	distPath,
 });
-
-lan.start();
-
 
 lan.start();
 console.log("Loop View started!");
