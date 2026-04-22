@@ -1,6 +1,9 @@
 import { BrowserWindow, Updater } from "electrobun/bun";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { createOSCBridge } from "./osc-bridge";
 import { createLANServer } from "./lan-server";
+
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
@@ -42,13 +45,19 @@ const bridge = createOSCBridge({
 	oscReceivePort: 11001,
 	wsPort: 3001,
 });
-
 bridge.start();
-// Start the LAN HTTP server so iPads/phones on the same WiFi can open the app
+
+// Electrobun runs from .app/Contents/MacOS/; built views are in ../Resources/views/mainview/
+const bundledViews = resolve("../Resources/views/mainview");
+const distPath = existsSync(bundledViews) ? bundledViews : resolve("dist");
+
 const lan = createLANServer({
 	port: 3000,
-	distPath: "dist",
+	distPath,
 });
+
+lan.start();
+
 
 lan.start();
 console.log("Loop View started!");
