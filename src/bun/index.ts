@@ -1,5 +1,10 @@
 import { BrowserWindow, Updater } from "electrobun/bun";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { createOSCBridge } from "./osc-bridge";
+import { createLANServer } from "./lan-server";
+
+
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
@@ -41,7 +46,17 @@ const bridge = createOSCBridge({
 	oscReceivePort: 11001,
 	wsPort: 3001,
 });
-
 bridge.start();
 
+// In the Electrobun bundle the bun script lives at Contents/Resources/app/bun/,
+// with views as its sibling at Contents/Resources/app/views/mainview/.
+const bundledViews = resolve(import.meta.dir, "../views/mainview");
+const distPath = existsSync(bundledViews) ? bundledViews : resolve("dist");
+
+const lan = createLANServer({
+	port: 3000,
+	distPath,
+});
+
+lan.start();
 console.log("Loop View started!");
