@@ -12,6 +12,10 @@ import {
 import type { OSCMessage } from "../types";
 
 let client: WSClient | null = null;
+const activePositionListeners = new Set<string>();
+let slotResyncTimer: ReturnType<typeof setInterval> | null = null;
+
+const SLOT_RESYNC_INTERVAL = 1500;
 
 export function connectToAbleton(wsUrl: string) {
 	if (client) client.disconnect();
@@ -25,8 +29,26 @@ export function disconnectFromAbleton() {
 		client.disconnect();
 		client = null;
 	}
+	if (slotResyncTimer) {
+		clearInterval(slotResyncTimer);
+		slotResyncTimer = null;
+	}
 	transport.setConnected(false);
 	clearPositions();
+	activePositionListeners.clear();
+}
+
+// AbletonOSC's playing_slot_index listener doesn't reliably fire when a clip
+// stops (loop boundary, scene change with launch quantization). Without this
+// poll, the ring stays frozen at the last position because we never learn the
+// slot went back to -1.
+function startSlotResync() {
+	if (slotResyncTimer) return;
+	slotResyncTimer = setInterval(() => {
+		for (const track of session.tracks) {
+			sendOSC("/live/track/get/playing_slot_index", track.index);
+		}
+	}, SLOT_RESYNC_INTERVAL);
 }
 
 export function sendOSC(address: string, ...args: (number | string)[]) {
@@ -39,7 +61,10 @@ function handleMessage(msg: OSCMessage) {
 	if (address === "/bridge/status") {
 		const isConnected = args[0] === "connected";
 		transport.setConnected(isConnected);
-		if (isConnected) queryInitialState();
+		if (isConnected) {
+			queryInitialState();
+			subscribeSongListeners();
+		}
 		return;
 	}
 
@@ -61,6 +86,8 @@ function handleMessage(msg: OSCMessage) {
 		setTrackCount(numTracks, session.numScenes);
 		initTracks(numTracks);
 		queryTrackData(numTracks);
+		subscribeTrackListeners(numTracks);
+		startSlotResync();
 		return;
 	}
 	if (address === "/live/song/get/num_scenes") {
@@ -73,7 +100,6 @@ function handleMessage(msg: OSCMessage) {
 		return;
 	}
 
-	// Per-track responses
 	if (address === "/live/track/get/name" && args.length >= 2) {
 		setTrack(args[0] as number, { name: args[1] as string });
 		return;
@@ -83,11 +109,31 @@ function handleMessage(msg: OSCMessage) {
 		return;
 	}
 	if (address === "/live/track/get/playing_slot_index" && args.length >= 2) {
-		setTrack(args[0] as number, { playingSlotIndex: args[1] as number });
+		const trackIndex = args[0] as number;
+		const newSlot = args[1] as number;
+		const oldSlot = session.tracks[trackIndex]?.playingSlotIndex ?? -1;
+
+		setTrack(trackIndex, { playingSlotIndex: newSlot });
+
+		// Both the one-shot /get and the /start_listen initial value fire this
+		// handler. Skip the unsub/resub churn when the slot hasn't actually
+		// changed — repeating stop_listen/start_listen on AbletonOSC over UDP
+		// races and occasionally leaves the position listener disabled.
+		if (oldSlot === newSlot) {
+			if (newSlot >= 0) subscribeClipPosition(trackIndex, newSlot);
+			return;
+		}
+
+		if (oldSlot >= 0) {
+			unsubscribeClipPosition(trackIndex, oldSlot);
+		}
+		if (newSlot >= 0) {
+			subscribeClipPosition(trackIndex, newSlot);
+			queryClipMetadata(trackIndex, newSlot);
+		}
 		return;
 	}
 
-	// Per-clip responses
 	if (address === "/live/clip/get/name" && args.length >= 3) {
 		setClip(args[0] as number, args[1] as number, { name: args[2] as string });
 		return;
@@ -117,12 +163,41 @@ function handleMessage(msg: OSCMessage) {
 		return;
 	}
 
-	// High-frequency clip position — bypass reactive system
 	if (address === "/live/clip/get/playing_position" && args.length >= 3) {
 		setPosition(args[0] as number, args[1] as number, args[2] as number);
 		return;
 	}
 }
+
+// --- Subscriptions ---
+
+function subscribeSongListeners() {
+	sendOSC("/live/song/start_listen/tempo");
+	sendOSC("/live/song/start_listen/is_playing");
+	sendOSC("/live/song/start_listen/beat");
+}
+
+function subscribeTrackListeners(numTracks: number) {
+	for (let i = 0; i < numTracks; i++) {
+		sendOSC("/live/track/start_listen/playing_slot_index", i);
+	}
+}
+
+function subscribeClipPosition(trackIndex: number, sceneIndex: number) {
+	const key = `${trackIndex}-${sceneIndex}`;
+	if (activePositionListeners.has(key)) return;
+	activePositionListeners.add(key);
+	sendOSC("/live/clip/start_listen/playing_position", trackIndex, sceneIndex);
+}
+
+function unsubscribeClipPosition(trackIndex: number, sceneIndex: number) {
+	const key = `${trackIndex}-${sceneIndex}`;
+	if (!activePositionListeners.has(key)) return;
+	activePositionListeners.delete(key);
+	sendOSC("/live/clip/stop_listen/playing_position", trackIndex, sceneIndex);
+}
+
+// --- Queries ---
 
 function queryInitialState() {
 	sendOSC("/live/song/get/tempo");
@@ -151,4 +226,14 @@ function queryClipData(numTracks: number, numScenes: number) {
 			sendOSC("/live/clip/get/is_midi_clip", t, s);
 		}
 	}
+}
+
+function queryClipMetadata(trackIndex: number, sceneIndex: number) {
+	sendOSC("/live/clip/get/name", trackIndex, sceneIndex);
+	sendOSC("/live/clip/get/color", trackIndex, sceneIndex);
+	sendOSC("/live/clip/get/length", trackIndex, sceneIndex);
+	sendOSC("/live/clip/get/loop_start", trackIndex, sceneIndex);
+	sendOSC("/live/clip/get/loop_end", trackIndex, sceneIndex);
+	sendOSC("/live/clip/get/is_audio_clip", trackIndex, sceneIndex);
+	sendOSC("/live/clip/get/is_midi_clip", trackIndex, sceneIndex);
 }

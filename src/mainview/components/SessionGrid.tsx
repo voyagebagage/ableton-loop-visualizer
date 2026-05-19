@@ -26,14 +26,18 @@ export default function SessionGrid() {
 					c.trackIndex === track.index &&
 					c.sceneIndex === track.playingSlotIndex,
 			);
-			if (!clip || clip.length === 0) continue;
+			if (!clip) continue;
+			// Audio clips without warping report length=0 but still have valid
+			// loop_start/loop_end — fall back to the effective loop span.
+			const loopLength = clip.loopEnd - clip.loopStart || clip.length;
+			if (loopLength <= 0) continue;
 
 			activeClips.push({
 				trackIndex: clip.trackIndex,
 				sceneIndex: clip.sceneIndex,
 				name: clip.name || track.name,
 				color: clip.color || track.color,
-				loopLength: clip.loopEnd - clip.loopStart || clip.length,
+				loopLength,
 				isAudio: clip.isAudio,
 				isActive: true,
 				waveform: generatePlaceholderWaveform(
