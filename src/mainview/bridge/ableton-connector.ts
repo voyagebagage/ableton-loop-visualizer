@@ -13,6 +13,9 @@ import type { OSCMessage } from "../types";
 
 let client: WSClient | null = null;
 const activePositionListeners = new Set<string>();
+let slotResyncTimer: ReturnType<typeof setInterval> | null = null;
+
+const SLOT_RESYNC_INTERVAL = 1500;
 
 export function connectToAbleton(wsUrl: string) {
 	if (client) client.disconnect();
@@ -26,9 +29,26 @@ export function disconnectFromAbleton() {
 		client.disconnect();
 		client = null;
 	}
+	if (slotResyncTimer) {
+		clearInterval(slotResyncTimer);
+		slotResyncTimer = null;
+	}
 	transport.setConnected(false);
 	clearPositions();
 	activePositionListeners.clear();
+}
+
+// AbletonOSC's playing_slot_index listener doesn't reliably fire when a clip
+// stops (loop boundary, scene change with launch quantization). Without this
+// poll, the ring stays frozen at the last position because we never learn the
+// slot went back to -1.
+function startSlotResync() {
+	if (slotResyncTimer) return;
+	slotResyncTimer = setInterval(() => {
+		for (const track of session.tracks) {
+			sendOSC("/live/track/get/playing_slot_index", track.index);
+		}
+	}, SLOT_RESYNC_INTERVAL);
 }
 
 export function sendOSC(address: string, ...args: (number | string)[]) {
@@ -67,6 +87,7 @@ function handleMessage(msg: OSCMessage) {
 		initTracks(numTracks);
 		queryTrackData(numTracks);
 		subscribeTrackListeners(numTracks);
+		startSlotResync();
 		return;
 	}
 	if (address === "/live/song/get/num_scenes") {
