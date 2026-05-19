@@ -94,7 +94,15 @@ function handleMessage(msg: OSCMessage) {
 
 		setTrack(trackIndex, { playingSlotIndex: newSlot });
 
-		// Manage clip position listeners based on slot changes
+		// Both the one-shot /get and the /start_listen initial value fire this
+		// handler. Skip the unsub/resub churn when the slot hasn't actually
+		// changed — repeating stop_listen/start_listen on AbletonOSC over UDP
+		// races and occasionally leaves the position listener disabled.
+		if (oldSlot === newSlot) {
+			if (newSlot >= 0) subscribeClipPosition(trackIndex, newSlot);
+			return;
+		}
+
 		if (oldSlot >= 0) {
 			unsubscribeClipPosition(trackIndex, oldSlot);
 		}

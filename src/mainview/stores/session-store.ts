@@ -34,20 +34,28 @@ export function initTracks(count: number) {
 }
 
 export function initClips(numTracks: number, numScenes: number) {
+	// Preserve any clip entries already populated by responses that arrived
+	// before this initializer ran (race between num_scenes and per-clip data).
+	const existing = new Map(
+		session.clips.map((c) => [`${c.trackIndex}-${c.sceneIndex}`, c]),
+	);
 	const clips: ClipData[] = [];
 	for (let t = 0; t < numTracks; t++) {
 		for (let s = 0; s < numScenes; s++) {
-			clips.push({
-				trackIndex: t,
-				sceneIndex: s,
-				name: "",
-				color: 0x888888,
-				length: 0,
-				loopStart: 0,
-				loopEnd: 0,
-				isAudio: false,
-				isMidi: false,
-			});
+			const prev = existing.get(`${t}-${s}`);
+			clips.push(
+				prev ?? {
+					trackIndex: t,
+					sceneIndex: s,
+					name: "",
+					color: 0x888888,
+					length: 0,
+					loopStart: 0,
+					loopEnd: 0,
+					isAudio: false,
+					isMidi: false,
+				},
+			);
 		}
 	}
 	setSession({ clips });
@@ -63,7 +71,21 @@ export function setClip(
 	);
 	if (idx >= 0) {
 		setSession("clips", idx, (prev) => ({ ...prev, ...data }));
+		return;
 	}
+	// Upsert: clip data arrived before initClips placed a slot for it.
+	setSession("clips", session.clips.length, {
+		trackIndex,
+		sceneIndex,
+		name: "",
+		color: 0x888888,
+		length: 0,
+		loopStart: 0,
+		loopEnd: 0,
+		isAudio: false,
+		isMidi: false,
+		...data,
+	});
 }
 
 export { session };
