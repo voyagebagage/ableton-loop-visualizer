@@ -4,7 +4,7 @@
 
 **[▶ Live demo](https://loop-view.idevandyou.workers.dev)** — runs in the browser on simulated playback, no Ableton needed.
 
-Every clip playing in your Ableton Live session as a Loopy-Pro-style spinning ring, on your desktop or on an iPad over Wi-Fi.
+Loop View shows every clip playing in your Ableton Live session as a Loopy-Pro-style spinning ring, on your desktop or on an iPad over Wi-Fi.
 
 <img width="892" height="643" alt="Loop View rings" src="https://github.com/user-attachments/assets/97a5cb62-122a-4488-8241-d653ade9ebb8" />
 
@@ -17,7 +17,8 @@ Ableton's native loop UX is painful to live with when you perform: no per-clip p
 flowchart LR
   A[Ableton Live<br/>+ AbletonOSC] <-- OSC over UDP<br/>:11000 / :11001 --> C[Bun main process<br/>OSC ⇄ WebSocket bridge]
   C -- WebSocket :3001 --> D[Desktop window<br/>SolidJS + Canvas 2D]
-  C -- HTTP :3000 + WS --> E[iPad / phone browser]
+  C -- HTTP :3000 (app) --> E[iPad / phone browser]
+  C -- WebSocket :3001 --> E
   D -- clicks: loop length --> C
 ```
 
