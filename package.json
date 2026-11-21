@@ -10,6 +10,7 @@
 		"dev:web": "vite",
 		"hmr": "vite --port 5173",
 		"build": "vite build",
+		"deploy:web": "VITE_DEMO=1 vite build --outDir ../../dist-web --emptyOutDir && bunx wrangler deploy --assets dist-web --name loop-view --compatibility-date 2026-11-01",
 		"build:canary": "vite build && electrobun build --env=canary"
 	},
 	"dependencies": {

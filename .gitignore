@@ -6,3 +6,11 @@ build/
 
 # Private docs
 STRATEGY.md
+dist-web/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

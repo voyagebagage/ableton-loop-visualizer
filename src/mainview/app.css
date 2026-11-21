@@ -77,6 +77,11 @@ main {
 	color: #6bff6b;
 }
 
+.connection-status.demo {
+	background: #3a2a12;
+	color: #ffb627;
+}
+
 .session-canvas {
 	flex: 1;
 	width: 100%;
