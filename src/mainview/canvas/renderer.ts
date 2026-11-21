@@ -18,9 +18,84 @@ export interface RendererState {
 	positions: Map<string, number>;
 }
 
+export interface CellLayout {
+	trackIndex: number;
+	sceneIndex: number;
+	cellX: number;
+	cellY: number;
+	cellWidth: number;
+	cellHeight: number;
+	cx: number;
+	cy: number;
+	outerRadius: number;
+	innerRadius: number;
+}
+
 const CELL_PADDING = 16;
 const RING_MARGIN_TOP = 30;
 const RING_MARGIN_BOTTOM = 40;
+const PILL_HIT_WIDTH = 80;
+const PILL_HIT_HEIGHT = 28;
+const PILL_HIT_TOP_OFFSET = 6;
+
+export function computeCellLayouts(
+	width: number,
+	height: number,
+	clips: ClipRenderData[],
+): CellLayout[] {
+	if (clips.length === 0) return [];
+
+	const columns = getColumnCount(width);
+	const rows = Math.ceil(clips.length / columns);
+	const cellWidth = (width - CELL_PADDING) / columns;
+	const cellHeight = Math.min(
+		cellWidth + RING_MARGIN_TOP + RING_MARGIN_BOTTOM,
+		(height - CELL_PADDING) / rows,
+	);
+	const ringSize =
+		Math.min(
+			cellWidth - CELL_PADDING * 2,
+			cellHeight - RING_MARGIN_TOP - RING_MARGIN_BOTTOM - CELL_PADDING,
+		) / 2;
+	const outerRadius = Math.max(ringSize, 30);
+	const innerRadius = outerRadius * 0.55;
+
+	const layouts: CellLayout[] = [];
+	for (let i = 0; i < clips.length; i++) {
+		const clip = clips[i];
+		const col = i % columns;
+		const row = Math.floor(i / columns);
+		const cellX = CELL_PADDING / 2 + col * cellWidth;
+		const cellY = CELL_PADDING / 2 + row * cellHeight;
+		layouts.push({
+			trackIndex: clip.trackIndex,
+			sceneIndex: clip.sceneIndex,
+			cellX,
+			cellY,
+			cellWidth,
+			cellHeight,
+			cx: cellX + cellWidth / 2,
+			cy: cellY + RING_MARGIN_TOP + outerRadius,
+			outerRadius,
+			innerRadius,
+		});
+	}
+	return layouts;
+}
+
+export function getPillHitRect(cell: CellLayout): {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+} {
+	return {
+		x: cell.cx - PILL_HIT_WIDTH / 2,
+		y: cell.cy + cell.outerRadius + PILL_HIT_TOP_OFFSET,
+		w: PILL_HIT_WIDTH,
+		h: PILL_HIT_HEIGHT,
+	};
+}
 
 export function startRenderLoop(
 	canvas: HTMLCanvasElement,
@@ -44,44 +119,23 @@ export function startRenderLoop(
 		const { width, height } = canvas.getBoundingClientRect();
 		ctx.clearRect(0, 0, width, height);
 
-		const clipCount = state.clips.length;
-		if (clipCount === 0) {
+		if (state.clips.length === 0) {
 			frameId = requestAnimationFrame(render);
 			return;
 		}
 
-		const columns = getColumnCount(width);
-		const rows = Math.ceil(clipCount / columns);
-		const cellWidth = (width - CELL_PADDING) / columns;
-		const cellHeight = Math.min(
-			cellWidth + RING_MARGIN_TOP + RING_MARGIN_BOTTOM,
-			(height - CELL_PADDING) / rows,
-		);
-		const ringSize =
-			Math.min(
-				cellWidth - CELL_PADDING * 2,
-				cellHeight - RING_MARGIN_TOP - RING_MARGIN_BOTTOM - CELL_PADDING,
-			) / 2;
-		const outerRadius = Math.max(ringSize, 30);
-		const innerRadius = outerRadius * 0.55;
+		const layouts = computeCellLayouts(width, height, state.clips);
 
-		for (let i = 0; i < clipCount; i++) {
+		for (let i = 0; i < state.clips.length; i++) {
 			const clip = state.clips[i];
-			const col = i % columns;
-			const row = Math.floor(i / columns);
+			const layout = layouts[i];
 
-			const cellX = CELL_PADDING / 2 + col * cellWidth;
-			const cellY = CELL_PADDING / 2 + row * cellHeight;
-			const cx = cellX + cellWidth / 2;
-			const cy = cellY + RING_MARGIN_TOP + outerRadius;
-
-			// Draw cell background
 			ctx.beginPath();
 			ctx.roundRect(
-				cellX + 4,
-				cellY + 4,
-				cellWidth - 8,
-				cellHeight - 8,
+				layout.cellX + 4,
+				layout.cellY + 4,
+				layout.cellWidth - 8,
+				layout.cellHeight - 8,
 				8,
 			);
 			ctx.fillStyle = "#1e1e21";
@@ -94,10 +148,10 @@ export function startRenderLoop(
 				: 0;
 
 			const config: RingConfig = {
-				x: cx,
-				y: cy,
-				outerRadius,
-				innerRadius,
+				x: layout.cx,
+				y: layout.cy,
+				outerRadius: layout.outerRadius,
+				innerRadius: layout.innerRadius,
 				color: abletonColorToHex(clip.color),
 				phase,
 				waveform: clip.waveform,
