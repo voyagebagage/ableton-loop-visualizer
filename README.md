@@ -29,7 +29,7 @@ flowchart LR
 
 1. Install [AbletonOSC](https://github.com/ideoforms/AbletonOSC) (Live 11+) and select it under **Settings → Link, Tempo & MIDI → Control Surface**.
 2. `bun install && bun run start` — the desktop window connects to Live.
-3. On an iPad on the same Wi-Fi, open `http://<your-mac-ip>:3000`.
+3. On an iPad on the same Wi-Fi, open `http://<your-mac-ip>:3000`. The LAN server has no authentication yet — use it on a network you trust (#22).
 
 No Ableton? `bun run dev:web` and open `http://localhost:5173/?demo`.
 
