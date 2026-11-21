@@ -1,0 +1,44 @@
+bunfig.toml
+  s_f9e26d315fabb1::t_5fe3935930e2b8 1-3
+tsconfig.json
+  s_f9e26d315fabb1::t_d7496d74e53a05 17-18
+src/bun/index.ts
+  s_f9e26d315fabb1::t_923c75ceea1980 31
+.github/workflows/ci.yml
+  s_f9e26d315fabb1::t_3b78b41766e2df 1-20
+src/three.d.ts
+  s_f9e26d315fabb1::t_923c75ceea1980 1-2
+README.md
+  s_f9e26d315fabb1::t_3d84f115d1f03c 18
+  s_f9e26d315fabb1::t_f4b66c29b8bedc 1-3,7,9,12-17,19-45
+src/bun/osc-client.ts
+  s_f9e26d315fabb1::t_923c75ceea1980 18
+  s_f9e26d315fabb1::t_1b3df441f9da1a 42-46
+src/core.test.ts
+  s_f9e26d315fabb1::t_ec2972420fa2bf 1-44
+package.json
+  s_f9e26d315fabb1::t_3b78b41766e2df 14-16
+  s_f9e26d315fabb1::t_43dd1778b612a9 24-28
+src/bun/osc-bridge.ts
+  s_f9e26d315fabb1::t_923c75ceea1980 126
+AGENTS.md
+  s_f9e26d315fabb1::t_d22c2cab351b51 1
+bun.lock
+  s_f9e26d315fabb1::t_428c7fe7289017 12-16,21,23,25,27,29,31,33,35,37,39,41,43,45,47,49,51,53,55,115,117,123,125,127,129,131,133,135,137,139,141,143,145,147,149,151,153,155,157,159,161,163,165,167,169,171-173,185,187,189,199,201,203,205,207,209,211,221,233,239,275,301,305,317,323,333,337,339,341,347,351,355,361,371,375,379-381,383,385,403-404,408-409
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "472f33d109e602b3871400301c3b91919c852d5a",
+  "prompts": {},
+  "sessions": {
+    "s_f9e26d315fabb1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6d51abaa-c7e4-43a4-9751-8b6b11c9ff6c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "voyagebagage <voyagebagageao@gmail.com>"
+    }
+  }
+}
