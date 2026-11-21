@@ -1,0 +1,21 @@
+.github/workflows/ci.yml
+  s_f9e26d315fabb1::t_51994d8d0eeb9e 7-9,14-15
+README.md
+  s_f9e26d315fabb1::t_51994d8d0eeb9e 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6637cc600e07eb02011b63d7eaf3e5b8a2d97a79",
+  "prompts": {},
+  "sessions": {
+    "s_f9e26d315fabb1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6d51abaa-c7e4-43a4-9751-8b6b11c9ff6c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "voyagebagage <voyagebagageao@gmail.com>"
+    }
+  }
+}
