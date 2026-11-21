@@ -1,0 +1,25 @@
+.gitignore
+  s_f9e26d315fabb1::t_8c9a89b62982e8 9,11-12
+src/mainview/bridge/clip-commands.ts
+  s_f9e26d315fabb1::t_20bd1d926591a1 1-33
+src/mainview/canvas/renderer.ts
+  s_f9e26d315fabb1::t_558858972cad58 21-33,37-98,122,127,129-131,135-138,151-154
+src/mainview/components/SessionGrid.tsx
+  s_f9e26d315fabb1::t_6b6a08fec9597c 6-7,15,55-78,111-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "af82c47cdf00ec08cb03bd006d955c6aecd2483e",
+  "prompts": {},
+  "sessions": {
+    "s_f9e26d315fabb1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6d51abaa-c7e4-43a4-9751-8b6b11c9ff6c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "voyagebagage <voyagebagageao@gmail.com>"
+    }
+  }
+}
