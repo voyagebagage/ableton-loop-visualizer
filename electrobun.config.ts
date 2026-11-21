@@ -10,6 +10,7 @@ export default {
 		copy: {
 			"dist/index.html": "views/mainview/index.html",
 			"dist/assets": "views/mainview/assets",
+			"dist/favicon.svg": "views/mainview/favicon.svg",
 		},
 		watchIgnore: ["dist/**"],
 		mac: {

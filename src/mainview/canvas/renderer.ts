@@ -213,7 +213,10 @@ export function createMockState(): RendererState {
 	return { clips, positions };
 }
 
-export function simulatePlayback(state: RendererState, bpm: number = 120) {
+export function simulatePlayback(
+	state: RendererState,
+	bpm: number = 120,
+): () => void {
 	const beatsPerSecond = bpm / 60;
 	const startTime = performance.now();
 
@@ -226,9 +229,10 @@ export function simulatePlayback(state: RendererState, bpm: number = 120) {
 			const key = `${clip.trackIndex}-${clip.sceneIndex}`;
 			positions.set(key, beatPosition);
 		}
-		requestAnimationFrame(update);
+		frameId = requestAnimationFrame(update);
 	}
 
 	const positions = state.positions;
-	requestAnimationFrame(update);
+	let frameId = requestAnimationFrame(update);
+	return () => cancelAnimationFrame(frameId);
 }

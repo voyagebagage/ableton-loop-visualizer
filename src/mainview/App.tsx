@@ -9,7 +9,7 @@ import {
 
 export default function App() {
 	onMount(() => {
-		connectToAbleton(settings.wsUrl());
+		if (!settings.isDemo) connectToAbleton(settings.wsUrl());
 	});
 
 	onCleanup(() => {
@@ -23,15 +23,21 @@ export default function App() {
 				<div class="transport-info">
 					<span class="bpm">{Math.round(transport.tempo())} BPM</span>
 					<span
-						class={`play-state ${transport.isPlaying() ? "playing" : ""}`}
+						class={`play-state ${settings.isDemo || transport.isPlaying() ? "playing" : ""}`}
 					>
-						{transport.isPlaying() ? "▶" : "■"}
+						{settings.isDemo || transport.isPlaying() ? "▶" : "■"}
 					</span>
-					<span
-						class={`connection-status ${transport.connected() ? "connected" : ""}`}
-					>
-						{transport.connected() ? "Connected" : "Disconnected"}
-					</span>
+					{settings.isDemo ? (
+						<span class="connection-status demo">
+							Demo · not connected to Ableton
+						</span>
+					) : (
+						<span
+							class={`connection-status ${transport.connected() ? "connected" : ""}`}
+						>
+							{transport.connected() ? "Connected" : "Disconnected"}
+						</span>
+					)}
 				</div>
 			</header>
 			<SessionGrid />

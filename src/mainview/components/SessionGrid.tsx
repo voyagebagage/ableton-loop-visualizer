@@ -79,21 +79,25 @@ export default function SessionGrid() {
 	onMount(() => {
 		createEffect(() => {
 			const isConnected = transport.connected();
-			const _tracks = session.tracks.length;
-			const _clips = session.clips.length;
+			const trackCount = session.tracks.length;
+			session.clips.length; // track clip changes so the grid rebuilds
 
 			if (cleanupRender) {
 				cleanupRender();
 				cleanupRender = null;
 			}
 
-			if (isConnected && session.tracks.length > 0) {
+			if (isConnected && trackCount > 0) {
 				const state = buildLiveState();
 				cleanupRender = startRenderLoop(canvasRef, state);
 			} else {
 				const mockState = createMockState();
-				simulatePlayback(mockState, 120);
-				cleanupRender = startRenderLoop(canvasRef, mockState);
+				const stopSimulation = simulatePlayback(mockState, 120);
+				const stopRender = startRenderLoop(canvasRef, mockState);
+				cleanupRender = () => {
+					stopSimulation();
+					stopRender();
+				};
 			}
 		});
 	});
