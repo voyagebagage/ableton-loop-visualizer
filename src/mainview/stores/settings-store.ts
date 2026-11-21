@@ -16,7 +16,7 @@ function detectWSUrl(): string {
 
 const [wsUrl, setWsUrl] = createSignal(detectWSUrl());
 
-// The public web build (Cloudflare Pages) has no bridge; ?demo forces it anywhere else.
+// The public web build (Cloudflare Workers) has no bridge; ?demo forces it anywhere else.
 const isDemo =
 	import.meta.env.VITE_DEMO === "1" ||
 	new URLSearchParams(window.location.search).has("demo");
