@@ -123,7 +123,7 @@ export function createOSCBridge(config: BridgeConfig): OSCBridge {
 						}),
 					);
 				},
-				message(ws, msg) {
+				message(_ws, msg) {
 					if (typeof msg === "string") {
 						handleWSMessage(msg);
 					}

@@ -28,7 +28,7 @@ async function getMainViewUrl(): Promise<string> {
 
 const url = await getMainViewUrl();
 
-const mainWindow = new BrowserWindow({
+new BrowserWindow({
 	title: "Loop View",
 	url,
 	frame: {
