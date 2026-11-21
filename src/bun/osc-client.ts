@@ -15,7 +15,7 @@ export interface OSCClient {
 	stop: () => void;
 }
 
-type BunUDPSocket = Awaited<ReturnType<typeof Bun.udpSocket>>;
+type BunUDPSocket = Bun.udp.Socket<"buffer">;
 
 export function createOSCClient(config: OSCClientConfig): OSCClient {
 	const { abletonHost, sendPort, receivePort } = config;
@@ -39,10 +39,11 @@ export function createOSCClient(config: OSCClientConfig): OSCClient {
 			socket: {
 				data(_socket, incomingBytes, _port, _address) {
 					try {
-						const bytes =
-							incomingBytes instanceof Uint8Array
-								? incomingBytes
-								: new Uint8Array(incomingBytes);
+						const bytes = new Uint8Array(
+							incomingBytes.buffer,
+							incomingBytes.byteOffset,
+							incomingBytes.byteLength,
+						);
 						const decodedMessage = decodeOSC(bytes);
 						for (const handler of handlers) {
 							handler(decodedMessage);
