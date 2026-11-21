@@ -3,6 +3,8 @@ import {
 	startRenderLoop,
 	createMockState,
 	simulatePlayback,
+	computeCellLayouts,
+	getPillHitRect,
 	type ClipRenderData,
 	type RendererState,
 } from "../canvas/renderer";
@@ -10,6 +12,7 @@ import { generatePlaceholderWaveform } from "../canvas/waveform-gen";
 import { session } from "../stores/session-store";
 import { transport } from "../stores/transport-store";
 import { positionBuffer } from "../bridge/position-buffer";
+import { cycleLoopLength } from "../bridge/clip-commands";
 
 export default function SessionGrid() {
 	let canvasRef!: HTMLCanvasElement;
@@ -49,6 +52,30 @@ export default function SessionGrid() {
 		return { clips: activeClips, positions: positionBuffer };
 	}
 
+	function handleCanvasClick(e: MouseEvent) {
+		if (!transport.connected()) return;
+
+		const rect = canvasRef.getBoundingClientRect();
+		const x = e.clientX - rect.left;
+		const y = e.clientY - rect.top;
+
+		const state = buildLiveState();
+		const layouts = computeCellLayouts(rect.width, rect.height, state.clips);
+
+		for (const cell of layouts) {
+			const pill = getPillHitRect(cell);
+			if (
+				x >= pill.x &&
+				x <= pill.x + pill.w &&
+				y >= pill.y &&
+				y <= pill.y + pill.h
+			) {
+				cycleLoopLength(cell.trackIndex, cell.sceneIndex);
+				return;
+			}
+		}
+	}
+
 	onMount(() => {
 		createEffect(() => {
 			const isConnected = transport.connected();
@@ -81,5 +108,11 @@ export default function SessionGrid() {
 		}
 	});
 
-	return <canvas ref={canvasRef} class="session-canvas" />;
+	return (
+		<canvas
+			ref={canvasRef}
+			class="session-canvas"
+			onClick={handleCanvasClick}
+		/>
+	);
 }
