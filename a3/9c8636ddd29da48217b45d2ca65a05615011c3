@@ -1,0 +1,20 @@
+README.md
+  s_f9e26d315fabb1::t_2586efe3064dcf 20-21
+  s_f9e26d315fabb1::t_12eeb01836bcb6 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a39c8636ddd29da48217b45d2ca65a05615011c3",
+  "prompts": {},
+  "sessions": {
+    "s_f9e26d315fabb1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "6d51abaa-c7e4-43a4-9751-8b6b11c9ff6c",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "voyagebagage <voyagebagageao@gmail.com>"
+    }
+  }
+}
